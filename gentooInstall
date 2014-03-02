@@ -1,0 +1,201 @@
+#!/bin/bash
+packageInfo="|"
+
+function StableGCC () {
+    equery -C m gcc  | egrep " amd64( |\$)" | grep -v "~amd64" | tail -n 1 | awk '{print $2}'  | awk 'BEGIN {FS=":"} {print $1}'
+}
+
+function CurrentGCC () {
+    gcc --version | head -n 1 | awk '{print $3}'
+}
+
+function getInstalledVersion () {
+    local packageName=$1
+    equery l $packageName | tail -n 1 
+}
+
+function getLatestVersion() {
+    local packageName=$1
+    echo "$packageName-$(equery -C m $packageName  | egrep "amd64" | tail -n 1 | awk '{print $2}'  | awk 'BEGIN {FS=":"} {print $1}')"
+}
+
+function getStableVersion() {
+    local packageName=$1
+    echo "$packageName-$(equery -C m $packageName  | egrep " amd64( |\$)" | grep -v "~amd64" | tail -n 1 | awk '{print $2}'  | awk 'BEGIN {FS=":"} {print $1}')"
+}
+
+function ValidateLatest(){
+    local packageName=$1
+    echo -n "| Validating $packageName..."
+    local current=$(getInstalledVersion $packageName)
+    local next=$(getLatestVersion $packageName)
+    if [[ "$current" == "$next" ]]; then
+        echo done
+    else
+        echo **FAIL**
+        packageInfo="$packageInfo\n| NEW : [$current -> $next]"
+    fi
+}
+
+function ValidateStable(){
+    local packageName=$1
+    echo -n "| Validating $packageName..."
+    local current=$(getInstalledVersion $packageName)
+    local next=$(getStableVersion $packageName)
+    if [[ "$current" == "$next" ]]; then
+        echo done
+    else
+        echo **FAIL**
+        packageInfo="$packageInfo\n| NEW : [$current -> $next]"
+    fi
+}
+
+function ValidateGCC () {
+    current=$(CurrentGCC)
+    next=$(StableGCC)
+    echo -n "| Validating build gcc..."
+    if [[ "$current" == "$next" ]]; then
+        echo done
+    else
+        echo **FAIL**
+        packageInfo="$packageInfo\n| BUILD GCC : [$current -> $next]"
+    fi
+}
+
+
+
+echo -n "Initialising..."
+OK=YES
+errorText=""
+command=$*
+echo "done"
+
+#
+# Capture GCC Information
+#
+echo -n "calculating gcc information..."
+currentGccVersion=$(CurrentGCC)
+availableGccVersion=$(StableGCC)
+
+if [[ "$currentGccVersion" != "$availableGccVersion" ]]; then
+  OK=NO
+  errorText="gcc is not up to date!"
+fi
+echo "done"
+
+#
+# Display help text...
+#
+cat << EOF
+-------------------------------------------------------------------------------------------------------
+|                              Install Help                                                           |
+-------------------------------------------------------------------------------------------------------
+|  Compiler:                                                                                          |
+| -----------                                                                                         |
+| current gcc:         $currentGccVersion
+| latest unmasked gcc: $availableGccVersion
+|                                                                                                     |
+|  Actions:                                                                                           |
+| ----------                                                                                          |
+| [b]  blocks:           Package is blocking another from being emerged                               |
+| [N]  New:              Package is being emerged for the first time                                  |
+| [NS] New Slow:         Installing a new version of an installed package, IN A NEW SLOT              |
+| [R]  Reinstall:        Portage will re-emerge the package                                           |
+| [F]  Fetch:            Portage requires you to manually fetch the sources                           |
+| [f]  Fetch (done):     Portage has detected you have already fetched a version of the sources       |
+|                        (see Fetch)                                                                  |
+| [U]  Upgrade:          Package will update the package to a NEWER version                           |
+| [UD] Downgrade:        Portage will downgrade the package to an OLDER version                       |
+| [rU] Minor Upgrade:    Upgrading a subslot (e.g 50.1->50.1.1) will force slot-operator deps to      |
+|                        rebuild                                                                      |
+| [rR] Forced Rebuild:   Package will be re-emerged due to a slot-operator dependency                 |
+| [U*] Masked Upgrade:   Package upgrade is masked by a missing keyword                               |
+|                                                                                                     |
+|  Use Flags:                                                                                         |
+| ------------                                                                                        |
+| *:  Flag has been changed since last time                                                           |
+| %:  Flag has been added to the package since last time                                              |
+|                                                                                                     |
+|  Masks:                                                                                             |
+| --------                                                                                            |
+| #:  package.mask                                                                                    |
+| *:  missing keyword                                                                                 |
+| ~:  Unstable                                                                                        |
+|                                                                                                     |
+|  Useful Files:                                                                                      |
+| ---------------                                                                                     |
+| Package ENVS:                /etc/portage/package.env                                               |
+| Package Use Flags:           /etc/portage/package.use                                               |
+| Package License acceptance:  /etc/portage/package.license                                           |
+| Accept a package keyword:    /etc/portage/package.accept_keywords                                   |
+|                                                                                                     |
+-------------------------------------------------------------------------------------------------------
+EOF
+
+#
+# Do action
+#
+if [[ "$OK" == "YES" ]]; then
+    echo ""
+    echo "System is OK, installation to continue..."
+    echo ""
+    $command || exit
+    echo ""
+else
+    echo "A fatal error, occurred: $errorText"
+    echo "Installation will now abort"
+    exit 1
+fi
+
+cat << EOF
+-------------------------------------------------------------------------------------------------------
+|                              System Validation                                                      |
+-------------------------------------------------------------------------------------------------------
+EOF
+echo "| build gcc:               $(CurrentGCC)"
+echo "| latest unmasked gcc:     $(StableGCC)"
+echo "| installed gcc:           $(getInstalledVersion sys-devel/gcc)"
+echo "| latest available gcc:    $(getLatestVersion sys-devel/gcc)"
+echo "|"
+echo "| current kernel:          $(getInstalledVersion sys-kernel/gentoo-sources)"
+echo "| latest unmasked kernel:  $(getStableVersion sys-kernel/gentoo-sources)"
+echo "| latest available kernel: $(getLatestVersion sys-kernel/gentoo-sources)"
+echo "|"
+echo "| unread news items:       $(eselect news count new)"
+
+cat << EOF
+|                                                                                                     |
+|  System Pacakges:                                                                                   |
+| ------------------                                                                                  |
+|                                                                                                     |
+EOF
+ValidateGCC
+ValidateStable sys-kernel/gentoo-sources
+
+cat << EOF
+|                                                                                                     |
+|  Unstable Pacakges:                                                                                 |
+| --------------------                                                                                |
+|                                                                                                     |
+EOF
+ValidateLatest app-editors/vim
+ValidateLatest sys-devel/gcc
+cat << EOF
+-------------------------------------------------------------------------------------------------------
+|                                Action required                                                      |
+-------------------------------------------------------------------------------------------------------
+|                                                                                                     |
+|  System Updates:                                                                                    |
+| --------------------                                                                                |
+|                                                                                                     |
+EOF
+emerge --verbose --update --deep --newuse --pretend --with-bdeps=y @world
+cat << EOF
+|                                                                                                     |
+|  Custom Packages:                                                                                   |
+| ------------------                                                                                  |
+EOF
+echo -e $packageInfo
+cat << EOF
+-------------------------------------------------------------------------------------------------------
+EOF
