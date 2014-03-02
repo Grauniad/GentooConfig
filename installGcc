@@ -1,0 +1,27 @@
+#!/bin/bash
+
+equery m gcc
+echo -n "Version (e.g 4.7.3-r1): "
+read -e version
+
+fullVersion="=sys-devel/gcc-$version"
+
+equery u $fullVersion || exit
+
+emerge -vuaDN $fullVersion
+
+echo "Choose a gcc version: "
+gcc-config -l
+read -e gccVersion
+gcc-config $gccVersion || exit
+
+echo "Updating environment..."
+env-update || exit
+source /etc/profile
+
+echo "Updating libTool"
+emerge --oneshot libtool
+
+gcc --version
+echo "Remember to update world..."
+echo "Remember to source /etc/profile!"
