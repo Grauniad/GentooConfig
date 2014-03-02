@@ -189,13 +189,24 @@ cat << EOF
 | --------------------                                                                                |
 |                                                                                                     |
 EOF
-emerge --verbose --update --deep --newuse --pretend --with-bdeps=y @world
+#emerge --verbose --update --deep --newuse --pretend --with-bdeps=y @world
 cat << EOF
 |                                                                                                     |
 |  Custom Packages:                                                                                   |
 | ------------------                                                                                  |
 EOF
 echo -e $packageInfo
+cat << EOF
+|                                                                                                     |
+|  System Versioning:                                                                                 |
+| --------------------                                                                                |
+|                                                                                                     |
+EOF
+cat /var/lib/portage/world > /root/scripts/worldFile
+cat /usr/src/linux/.config > /root/scripts/kernelConfig
+pushd /root/scripts > /dev/null
+git status
+popd > /dev/null
 cat << EOF
 -------------------------------------------------------------------------------------------------------
 EOF
