@@ -1,0 +1,49 @@
+#
+# Add shiny things to vim
+#
+app-editors/vim cscope gpm nls python vim-pager
+
+#
+# Install Java plugins
+#
+dev-java/icedtea-bin  nsplugin
+
+#
+# Required to get gnome to build...
+#
+dev-libs/openssl -bindist
+net-misc/openssh -bindist
+>=media-plugins/gst-plugins-meta-0.10-r8:0.10 ffmpeg
+
+#
+# Enable loop optimizations in GCC:
+#
+>=sys-devel/gcc-4.8.1-r1 graphite
+
+
+#
+# Qt only apps:
+#
+app-emulation/virtualbox qt4
+dev-qt/qtgui gtkstyle 
+
+#
+# Specify version of gtk to use for wireshark...
+#
+net-analyzer/wireshark -gtk2 gtk3
+
+#
+# Chromimum requirements...
+#
+sys-libs/zlib minizip
+dev-libs/libxml2 icu
+
+#
+# Scientific libraries
+#
+sci-libs/plplot threads tk qhull
+
+#
+# Required for valgrind
+#
+sys-libs/glibc debug

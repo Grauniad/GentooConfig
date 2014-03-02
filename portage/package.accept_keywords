@@ -1,0 +1,20 @@
+>=app-editors/vim-7.4 ~amd64
+=app-editors/vim-core-7.4.169 ~amd64
+
+#
+# Building latest gcc:
+#
+=sys-devel/gcc-4.8.2 ~amd64
+=dev-libs/cloog-0.18.0 ~amd64
+=dev-libs/isl-0.11.1 ~amd64
+
+#
+# Bianry google-chrome...
+#
+www-client/google-chrome ~amd64
+
+
+#
+# All of plplot is marked as "testing"
+#
+sci-libs/plplot ~amd64
