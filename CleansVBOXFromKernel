@@ -1,0 +1,7 @@
+#/bin/bash
+
+echo -n "Removing vbox modules from the kernel..."
+modprobe -r vboxnetflt vboxnetadp
+modprobe -r vboxdrv 
+echo "done"
+lsmod
