@@ -189,7 +189,7 @@ cat << EOF
 | --------------------                                                                                |
 |                                                                                                     |
 EOF
-#emerge --verbose --update --deep --newuse --pretend --with-bdeps=y @world
+emerge --verbose --update --deep --newuse --pretend --with-bdeps=y @world
 cat << EOF
 |                                                                                                     |
 |  Custom Packages:                                                                                   |
