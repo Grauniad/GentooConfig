@@ -157,7 +157,7 @@ echo "| latest unmasked gcc:     $(StableGCC)"
 echo "| installed gcc:           $(getInstalledVersion sys-devel/gcc)"
 echo "| latest available gcc:    $(getLatestVersion sys-devel/gcc)"
 echo "|"
-echo "| current kernel:          $(getInstalledVersion sys-kernel/gentoo-sources)"
+echo "| current kernel:          $(uname -r | sed -e 's/-gentoo//')"
 echo "| latest unmasked kernel:  $(getStableVersion sys-kernel/gentoo-sources)"
 echo "| latest available kernel: $(getLatestVersion sys-kernel/gentoo-sources)"
 echo "|"
@@ -189,6 +189,16 @@ cat << EOF
 | --------------------                                                                                |
 |                                                                                                     |
 EOF
+#
+# Check the latest kernel is installed!
+#
+latestKernel=$(getStableVersion sys-kernel/gentoo-sources)
+kernelVer=$(echo $latestKernel | sed -e 's/sys-kernel\/gentoo-sources-//')
+runningKer=$(uname -r| sed -e 's/-gentoo//')
+if [[ "$runningKer" != "$kernelVer" ]]; then
+    echo "| Build the latest kernel!: $runningKer -> $kernelVer (/usr/src/linux-$kernelVer-gentoo)"
+fi
+
 emerge --verbose --update --deep --newuse --pretend --with-bdeps=y @world
 cat << EOF
 |                                                                                                     |
