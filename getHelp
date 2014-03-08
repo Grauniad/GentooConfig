@@ -1,0 +1,10 @@
+#!/bin/bash
+
+optionName=$1
+
+echo "Looking for: $optionName"
+kernelLoc=$(eselect kernel show | awk '/src/ {print $1}')
+match=$(find $kernelLoc -type f -name Kconfig | xargs grep "config $optionName" | head -n 1)
+file=$(echo $match | awk 'BEGIN {FS=":"} {print $1}')
+echo "found $file from $match"
+less -p "config $optionName" $file 

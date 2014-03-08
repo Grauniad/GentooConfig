@@ -140,6 +140,8 @@ if [[ "$OK" == "YES" ]]; then
     echo "System is OK, installation to continue..."
     echo ""
     $command || exit
+    etc-update || exit
+    emerge --ask --depclean
     echo ""
 else
     echo "A fatal error, occurred: $errorText"
