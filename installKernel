@@ -30,7 +30,7 @@ echo "Installing the kernel..."
 make install ||exit
 cd /boot
 mv -i /boot/kernel-gentoo /boot/kernel-gentoo-old || exit 
-mv -i /boot/config-$buildKernel-gentoo /boot/kernel-gentoo || exit
+mv -i /boot/vmlinuz-$buildKernel-gentoo /boot/kernel-gentoo || exit
 
 echo "Completed install of kernel: $buildKernel"
 
