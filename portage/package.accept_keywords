@@ -1,5 +1,5 @@
 >=app-editors/vim-7.4 ~amd64
-=app-editors/vim-core-7.4.169 ~amd64
+>=app-editors/vim-core-7.4.169 ~amd64
 
 #
 # Building latest gcc:
