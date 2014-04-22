@@ -1,0 +1,30 @@
+#!/bin/bash
+
+eselect kernel list
+read -e kernelVersion
+eselect kernel set $kernelVersion
+newKernel=$(eselect kernel show | awk '/src/ {print $1}')
+buildKernel=$(echo $newKernel  | awk 'BEGIN { FS="-" } {print $2}')
+
+echo "Kernel to build: $buildKernel"
+
+echo "Reconfigure the kernel..."
+cd $newKernel
+make menuconfig
+
+echo "Backing up new kernel config..."
+cp -i $newKernel/.config ~/scripts/kernelConfig || exit
+
+echo "Building the kernel..."
+make -j 9 || exit 
+
+echo "Installing drivers..."
+make modules_install || exit
+
+echo "Installing the kernel..."
+make install ||exit
+cd /boot
+mv -i /boot/kernel-gentoo /boot/kernel-gentoo-old || exit 
+mv -i /boot/vmlinuz-$buildKernel-gentoo /boot/kernel-gentoo || exit
+
+echo "Completed install of kernel: $buildKernel"
