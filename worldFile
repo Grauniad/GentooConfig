@@ -19,6 +19,7 @@ net-wireless/wpa_supplicant
 sci-libs/plplot
 sys-apps/dbus
 sys-apps/systemd
+sys-devel/distcc
 sys-devel/gcc
 sys-devel/gcc:4.7
 sys-devel/gcc:4.8
